@@ -1,1 +1,1 @@
-# trashpanda-ds-2
+# trashpanda-ds-api
