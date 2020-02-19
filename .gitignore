@@ -32,7 +32,7 @@ node_modules/
 *.zip
 
 # Databases
-*.sql
+# *.sql
 *.sqlite
 
 # Created by https://www.gitignore.io/api/osx,python,visualstudiocode
