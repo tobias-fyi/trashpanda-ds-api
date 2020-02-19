@@ -1,10 +1,10 @@
 """
-TPDS API :: Flask CLI Configuration
+TPDS Detect API :: Flask CLI Configuration
 """
 
 from flask.cli import FlaskGroup
 
-from dsapi import app, db
+from detect import app, db
 
 
 cli = FlaskGroup(app)

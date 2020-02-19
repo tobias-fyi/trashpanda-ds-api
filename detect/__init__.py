@@ -15,7 +15,7 @@ api = Api(app)
 
 # === Set config === #
 app_settings = os.getenv("APP_SETTINGS")
-app.config.from_object("dsapi.config.DevelopmentConfig")
+app.config.from_object("detect.config.DevelopmentConfig")
 
 # === Instantiate the database === #
 db = SQLAlchemy(app)

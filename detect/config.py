@@ -1,5 +1,5 @@
 """
-TPDS API :: App configurations
+TPDS Detect API :: App configurations
 """
 
 import os

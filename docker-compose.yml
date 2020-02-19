@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  dsapi:
+  detect:
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,9 +11,9 @@ services:
     ports:
       - 5001:5000
     environment:
-      - FLASK_APP=dsapi/__init__.py
+      - FLASK_APP=detect/__init__.py
       - FLASK_ENV=development
-      - APP_SETTINGS=dsapi.config.DevelopmentConfig
+      - APP_SETTINGS=detect.config.DevelopmentConfig
       - DATABASE_URL=postgresql://postgres:postgres@materials-db:5432/materials_dev
       - DATABASE_TEST_URL=postgresql://postgres:postgres@materials-db:5432/materials_test
     depends_on:
@@ -21,7 +21,7 @@ services:
 
   materials-db:
     build:
-      context: ./dsapi/db
+      context: ./detect/db
       dockerfile: Dockerfile
     expose:
       - 5432

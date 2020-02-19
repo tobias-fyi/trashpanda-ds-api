@@ -1,15 +1,15 @@
 """
-TPDS API :: Pytest Fixtures
+TPDS Detect API :: Pytest Fixtures
 """
 
 import pytest
 
-from dsapi import app, db
+from detect import app, db
 
 
 @pytest.fixture(scope="module")
 def test_app():
-    app.config.from_object("project.config.TestingConfig")
+    app.config.from_object("detect.config.TestingConfig")
     with app.app_context():
         yield app  # Testing happens here
 
