@@ -60,6 +60,14 @@ def snake_to_cd_case(name: str):
     return " ".join(split)
 
 
+class Ping(Resource):
+    def get(self):
+        return {
+            "status": "success",
+            "message": "pong!",
+        }
+
+
 class Detect(Resource):
     @api.marshal_with(resource_fields)
     def post(self):
@@ -106,7 +114,6 @@ class Detect(Resource):
 
 
 class Clusters(Resource):
-    # @api.marshal_with(material, as_list=True) # Used when response is a list
     @api.marshal_with(resource_fields)
     def get(self, cluster):
         # Instantiate response object
@@ -125,6 +132,11 @@ class Clusters(Resource):
             response_object["message"] = "success"
             return response_object, 200
 
+    @api.marshal_with(material, as_list=True)
+    def get(self):
+        return Material.query.all(), 200
 
-api.add_resource(Clusters, "/clusters/<cluster>")
+
+api.add_resource(Ping, "/ping")
 api.add_resource(Detect, "/detect")
+api.add_resource(Clusters, "/clusters/<cluster>")
