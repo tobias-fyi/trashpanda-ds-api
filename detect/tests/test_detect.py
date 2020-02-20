@@ -1,17 +1,18 @@
 """
-TPDS Detect API :: Endpoint Test `/ping`
+TPDS Detect API :: Endpoint Test `/detect`
 """
 
 import json
 
 
-def test_ping(test_app):
-    """Tests the `/ping` API endpoint."""
+def test_detect(test_app):
+    """Tests the `/detect` API endpoint."""
     # Make request and parse the response
     client = test_app.test_client()
-    resp = client.get("/ping")
+    resp = client.get("/detect")
     data = json.loads(resp.data.decode())
     # Test the response
     assert resp.status_code == 200
-    assert "pong" in data["message"]
+    assert "plastic_containers" in data["cluster"]
     assert "success" in data["status"]
+    assert len(data["materials"]) > 0

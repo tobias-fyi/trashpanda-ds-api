@@ -2,12 +2,16 @@
 TPDS Detect API :: Flask CLI Configuration
 """
 
+import sys
+
 from flask.cli import FlaskGroup
 
-from detect import app, db
+from detect import create_app, db
+from detect.api.models import Material
 
 
-cli = FlaskGroup(app)
+app = create_app
+cli = FlaskGroup(create_app=create_app)
 
 
 @cli.command("recreate_db")

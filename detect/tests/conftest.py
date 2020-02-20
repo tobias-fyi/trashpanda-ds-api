@@ -4,11 +4,12 @@ TPDS Detect API :: Pytest Fixtures
 
 import pytest
 
-from detect import app, db
+from detect import create_app, db
 
 
 @pytest.fixture(scope="module")
 def test_app():
+    app = create_app()
     app.config.from_object("detect.config.TestingConfig")
     with app.app_context():
         yield app  # Testing happens here

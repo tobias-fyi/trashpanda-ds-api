@@ -19,6 +19,7 @@ python-dotenv = "*"
 flask-sqlalchemy = "*"
 psycopg2-binary = "*"
 pytest = "*"
+flask-shell-ipython = "*"
 
 [requires]
 python_version = "3.8"
