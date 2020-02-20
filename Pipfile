@@ -21,6 +21,7 @@ psycopg2-binary = "*"
 pytest = "*"
 flask-shell-ipython = "*"
 imageio = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"

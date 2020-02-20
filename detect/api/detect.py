@@ -106,7 +106,7 @@ class Detect(Resource):
 
 
 class Clusters(Resource):
-    # @api.marshal_with(material, as_list=True)
+    # @api.marshal_with(material, as_list=True) # Used when response is a list
     @api.marshal_with(resource_fields)
     def get(self, cluster):
         # Instantiate response object
