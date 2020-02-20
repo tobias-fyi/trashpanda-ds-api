@@ -5,7 +5,9 @@ FROM python:3.8.0-alpine
 RUN apk update && \
     apk add --virtual build-deps gcc python-dev musl-dev && \
     apk add postgresql-dev && \
-    apk add netcat-openbsd
+    apk add netcat-openbsd && \
+    # Pillow dependencies
+    apk add jpeg-dev zlib-dev
 
 # Set envirovars
 # Prevent pyc files

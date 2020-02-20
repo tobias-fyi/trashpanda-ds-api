@@ -20,6 +20,7 @@ flask-sqlalchemy = "*"
 psycopg2-binary = "*"
 pytest = "*"
 flask-shell-ipython = "*"
+imageio = "*"
 
 [requires]
 python_version = "3.8"
