@@ -6,9 +6,11 @@ import base64
 import binascii
 import json
 import io
+import os
+import random
 
 from sqlalchemy import exc
-from flask import Blueprint, request
+from flask import Blueprint, request, redirect, url_for
 from flask_restplus import Resource, Api, fields
 from imageio import imread
 
@@ -21,7 +23,8 @@ api = Api(detect_blueprint)
 
 # === Format for marshaled response objects === #
 # These dictionaries act as templates for response objects
-material = api.model(
+# and can validate the response if needed.
+material = api.model(  # Format/validate the data model as json
     "Material",
     {
         "id": fields.Integer(readOnly=True),
@@ -30,9 +33,10 @@ material = api.model(
         "cluster": fields.String(),
     },
 )
-# Custom model for the response
+# Format/validate custom json response
 resource_fields = {
     "message": fields.String(),
+    "cluster_name": fields.String(),
     "cluster": fields.String(),
     "materials": fields.List(fields.Integer()),
 }
@@ -43,9 +47,17 @@ def from_base64(img_string: str):
     # If base64 has metadata attached, get only data after comma
     if img_string.startswith("data"):
         img_string = img_string.split(",")[-1]
-
     # Convert string to array
     return imread(io.BytesIO(base64.b64decode(img_string)))
+
+
+def snake_to_cd_case(name: str):
+    """Converts a snake_case cluster name to Title Case.
+    In the case of 'cd_cases', abbreviation is capitalized."""
+    split = name.title().split("_")
+    if len(split[0]) == 2:
+        split[0] = split[0].upper()
+    return " ".join(split)
 
 
 class Detect(Resource):
@@ -68,20 +80,29 @@ class Detect(Resource):
             response_object["message"] = "success"
 
         # TODO: Make prediction
-        predicted_cluster = "plastic_containers"
-        response_object["cluster"] = predicted_cluster
+        # Before implementing a model, randomize dummy prediction
+        # Retrieve all records from database
+        all_materials = Material.query.all()
+        # Set comprehension for clusters
+        all_clusters = {row.cluster for row in all_materials}
+        # Choose random cluster from set
+        prediction = random.choice(list(all_clusters))
+        response_object["cluster"] = prediction
+        # Format into Title Case for display purposes
+        response_object["cluster_name"] = snake_to_cd_case(prediction)
 
-        # TODO: Get material_id list from database
-        materials = [
-            593,
-            466,
-            621,
-            471,
-            677,
-        ]
-        response_object["materials"] = materials
+        # Get list of materials for the predicted cluster
+        materials = Material.query.filter(Material.cluster == prediction).all()
 
-        return response_object, 201
+        if not materials:  # Query was unsuccessful
+            response_object["materials"] = []
+            response_object["message"] = f"No materials listed for {prediction}"
+            return response_object, 404
+
+        else:  # Query was successful
+            response_object["materials"] = [row.material_id for row in materials]
+            response_object["message"] = "success"
+            return response_object, 200
 
 
 class Clusters(Resource):

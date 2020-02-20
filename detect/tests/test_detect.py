@@ -2,20 +2,41 @@
 TPDS Detect API :: Endpoint Test `/detect`
 """
 
+import base64
 import json
+
+from imageio import imread
 
 from detect import db
 from detect.api.models import Material
 
-# Load base64 string from file
+
+# === Load base64 string from file === #
 test_b64 = "detect/tests/images/img_b64.txt"
 
 with open(test_b64, "r") as f:
     img_string = f.read()
 
 
+def to_base64(img_filepath: str) -> str:
+    """Returns base64 representation of an image."""
+    with open(img_filepath, "rb") as img:
+        img_data = img.read()
+
+    b64_bytes = base64.b64encode(img_data)
+    b64_string = b64_bytes.decode()
+
+    return b64_string
+
+
+# === Load + encode image into base64 string === #
+test_img_filepath = "detect/tests/images/010.png"
+# Encode image as base64 string
+encoded_string = to_base64(test_img_filepath)
+
+
 def test_detect(test_app, test_database):
-    """Tests the `/detect` API endpoint with base64 string."""
+    """Test case for detect endpoint - base64 string."""
     # Make request and parse the response
     client = test_app.test_client()
     resp = client.post(
@@ -25,7 +46,21 @@ def test_detect(test_app, test_database):
     )
     data = json.loads(resp.data.decode())
     # Test the response
-    assert resp.status_code == 201
+    assert resp.status_code == 200
+
+
+def test_detect_from_image(test_app, test_database):
+    """Test case for detect endpoint - base64-encoded image."""
+    # Make request and parse the response
+    client = test_app.test_client()
+    resp = client.post(
+        "/detect",
+        data=json.dumps({"imgb64": encoded_string}),
+        content_type="application/json",
+    )
+    data = json.loads(resp.data.decode())
+    # Test the response
+    assert resp.status_code == 200
 
 
 def test_detect_invalid_json(test_app, test_database):
