@@ -4,6 +4,9 @@ TPDS Detect API :: Endpoint Test `/detect`
 
 import json
 
+from detect import db
+from detect.api.models import Material
+
 # Load base64 string from file
 test_b64 = "detect/tests/images/img_b64.txt"
 
@@ -23,7 +26,6 @@ def test_detect(test_app, test_database):
     data = json.loads(resp.data.decode())
     # Test the response
     assert resp.status_code == 201
-    assert "success" in data["status"]
 
 
 def test_detect_invalid_json(test_app, test_database):
@@ -60,3 +62,12 @@ def test_invalid_base64_string(test_app, test_database):
     assert resp.status_code == 400
     assert "Invalid base64-encoded string" in data["message"]
 
+
+def test_single_cluster(test_app, test_database):
+    """Test case for querying for a single cluster."""
+    client = test_app.test_client()
+    resp = client.get("/clusters/batteries")
+    # Parse the response
+    data = json.loads(resp.data.decode())
+    assert resp.status_code == 200
+    assert len(data["materials"]) == 13
