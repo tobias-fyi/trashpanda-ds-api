@@ -2,6 +2,13 @@
 
 A Flask REST API to receive image data, run it through an object detection model, and send back the appropriate prediction(s).
 
+- [Overview](#overview)
+- [Usage](#usage)
+  - [Object Detection](#object-detection)
+  - [Database Queries](#database-queries)
+    - [List of all materials](#list-of-all-materials)
+    - [Materials list for each cluster](#materials-list-for-each-cluster)
+
 ## Overview
 
 The core of the API is built on `Flask` and `Flask-RESTPlus`, containerized using docker and docker-compose, and deployed to Heroku. The app is connected to a Postgres database to manage the materials data, which is queried using `Flask-SQLAlchemy`.
@@ -32,10 +39,10 @@ The POST request should be `JSON`, formatted as follows:
 
 There are also 2 routes that accept GET requests and query the database accordingly.
 
-> List of all materials
+#### List of all materials
 
     https://gentle-mesa-73091.herokuapp.com/clusters
 
-> Materials list for each cluster
+#### Materials list for each cluster
 
     https://gentle-mesa-73091.herokuapp.com/clusters/<cluster>
