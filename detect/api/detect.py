@@ -120,6 +120,9 @@ class Clusters(Resource):
         response_object = {}
         response_object["cluster"] = cluster
 
+        # Format into Title Case for display purposes
+        response_object["cluster_name"] = snake_to_cd_case(cluster)
+
         # Get list of records matching the cluster name
         materials = Material.query.filter(Material.cluster == cluster).all()
         if not materials:  # Query was unsuccessful
@@ -132,6 +135,8 @@ class Clusters(Resource):
             response_object["message"] = "success"
             return response_object, 200
 
+
+class ClustersList(Resource):
     @api.marshal_with(material, as_list=True)
     def get(self):
         return Material.query.all(), 200
@@ -139,4 +144,5 @@ class Clusters(Resource):
 
 api.add_resource(Ping, "/ping")
 api.add_resource(Detect, "/detect")
+api.add_resource(ClustersList, "/clusters")
 api.add_resource(Clusters, "/clusters/<cluster>")
