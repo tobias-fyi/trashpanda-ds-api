@@ -32,10 +32,10 @@ The POST request should be `JSON`, formatted as follows:
 
 There are also 2 routes that accept GET requests and query the database accordingly.
 
-1. List of all materials
+> List of all materials
 
     https://gentle-mesa-73091.herokuapp.com/clusters
 
-2. Materials list for each cluster
+> Materials list for each cluster
 
     https://gentle-mesa-73091.herokuapp.com/clusters/<cluster>
