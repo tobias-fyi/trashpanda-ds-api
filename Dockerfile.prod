@@ -1,0 +1,36 @@
+# Use Alpine-based Python base image
+FROM python:3.8.0-alpine
+
+# Install dependencies
+RUN apk update && \
+    apk add --virtual build-deps gcc python-dev musl-dev && \
+    apk add postgresql-dev && \
+    apk add netcat-openbsd && \
+    # Pillow dependencies
+    apk add jpeg-dev zlib-dev
+
+# Create + set working directory
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+# Set envirovars
+# Prevent pyc files
+ENV PYTHONDONTWRITEBYTECODE 1
+# Prevents buffering stdout and sdterr
+ENV PYTHONUNBUFFERED 1
+ENV FLASK_ENV production
+ENV APP_SETTINGS detect.config.ProductionConfig
+
+# Add and install dependencies
+COPY ./requirements.txt /usr/src/app/requirements.txt
+RUN pip install -r requirements.txt
+
+# Add app
+COPY . /usr/src/app
+
+# Add and run as non-root user
+RUN adduser -D tpds
+USER tpds
+
+# Run the gunicorn server
+CMD gunicorn --bind 0.0.0.0:$PORT manage:app

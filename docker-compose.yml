@@ -1,0 +1,29 @@
+version: "3.7"
+
+services:
+  detect:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: ["/usr/src/app/entrypoint.sh"]
+    volumes:
+      - ".:/usr/src/app"
+    ports:
+      - 5001:5000
+    environment:
+      - FLASK_ENV=development
+      - APP_SETTINGS=detect.config.DevelopmentConfig
+      - DATABASE_URL=postgresql://postgres:postgres@materials-db:5432/materials_dev
+      - DATABASE_TEST_URL=postgresql://postgres:postgres@materials-db:5432/materials_test
+    depends_on:
+      - materials-db
+
+  materials-db:
+    build:
+      context: ./detect/db
+      dockerfile: Dockerfile
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
