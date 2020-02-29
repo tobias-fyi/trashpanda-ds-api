@@ -1,13 +1,13 @@
-# Use Alpine-based Python base image
-FROM python:3.8.0-alpine
+# Use Debian-based Python base image
+FROM python:3.8.0-slim-buster
 
 # Install dependencies
-RUN apk update && \
-    apk add --virtual build-deps gcc python-dev musl-dev && \
-    apk add postgresql-dev && \
-    apk add netcat-openbsd && \
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y netcat-openbsd gcc && \
     # Pillow dependencies
-    apk add jpeg-dev zlib-dev
+    apt-get install -y libjpeg-dev zlib1g-dev && \
+    apt-get clean
 
 # Set envirovars
 # Prevent pyc files
@@ -20,6 +20,7 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 # Add and install dependencies
+RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/app/requirements.txt
 RUN pip install -r requirements.txt
 
