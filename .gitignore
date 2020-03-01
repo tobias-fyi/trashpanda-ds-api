@@ -1,6 +1,7 @@
 # ====== Project-Specific ====== #
 
-# === Models === #
+# === Model weights files === #
+*.weights
 *.h5
 *.pkl
 

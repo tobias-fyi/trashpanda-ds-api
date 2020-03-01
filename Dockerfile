@@ -5,6 +5,9 @@ FROM python:3.8.0-slim-buster
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y netcat-openbsd gcc && \
+    # OpenCV dependencies
+    apt-get install -y libglib2.0-0 libsm6 libxext6 && \
+    apt-get install -y libglib2.0-0 libxrender1 libfontconfig1 && \
     # Pillow dependencies
     apt-get install -y libjpeg-dev zlib1g-dev && \
     apt-get clean

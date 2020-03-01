@@ -9,13 +9,15 @@ import io
 import os
 import random
 
-from sqlalchemy import exc
+import cv2
 from flask import Blueprint, request, redirect, url_for
 from flask_restplus import Resource, Api, fields
 from imageio import imread
+from sqlalchemy import exc
 
 from detect import db
 from detect.api.models import Material
+from detect.api.yolo import get_prediction
 
 detect_blueprint = Blueprint("detect", __name__)
 api = Api(detect_blueprint)
@@ -47,8 +49,9 @@ def from_base64(img_string: str):
     # If base64 has metadata attached, get only data after comma
     if img_string.startswith("data"):
         img_string = img_string.split(",")[-1]
-    # Convert string to array
+    # Convert string to array and load into opencv
     return imread(io.BytesIO(base64.b64decode(img_string)))
+    # return cv2.imdecode(img_array, cv2.IMREAD_COLOR)
 
 
 def snake_to_cd_case(name: str):
@@ -87,30 +90,27 @@ class Detect(Resource):
         else:
             response_object["message"] = "success"
 
-        # TODO: Make prediction
-        # Before implementing a model, randomize dummy prediction
-        # Retrieve all records from database
-        all_materials = Material.query.all()
-        # Set comprehension for clusters
-        all_clusters = {row.cluster for row in all_materials}
-        # Choose random cluster from set
-        prediction = random.choice(list(all_clusters))
+        # TODO: === Run object detection === #
+        prediction = get_prediction(img)
+
         response_object["cluster"] = prediction
         # Format into Title Case for display purposes
-        response_object["cluster_name"] = snake_to_cd_case(prediction)
+        # response_object["cluster_name"] = snake_to_cd_case(prediction)
 
         # Get list of materials for the predicted cluster
-        materials = Material.query.filter(Material.cluster == prediction).all()
+        # materials = Material.query.filter(Material.cluster == prediction).all()
 
-        if not materials:  # Query was unsuccessful
-            response_object["materials"] = []
-            response_object["message"] = f"No materials listed for {prediction}"
-            return response_object, 404
+        return response_object, 200
 
-        else:  # Query was successful
-            response_object["materials"] = [row.material_id for row in materials]
-            response_object["message"] = "success"
-            return response_object, 200
+        # if not materials:  # Query was unsuccessful
+        #     response_object["materials"] = []
+        #     response_object["message"] = f"No materials listed for {prediction}"
+        #     return response_object, 404
+
+        # else:  # Query was successful
+        #     response_object["materials"] = [row.material_id for row in materials]
+        #     response_object["message"] = "success"
+        #     return response_object, 200
 
 
 class Clusters(Resource):
