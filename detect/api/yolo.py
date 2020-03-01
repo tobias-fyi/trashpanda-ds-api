@@ -12,17 +12,24 @@ import cv2
 # === YOLO config variables === #
 # Paths to necessary files
 yolo_path = "detect/api/yolo_config"
-weights_path = os.path.join(yolo_path, "yolo-obj_1000.weights")
+weights_path = os.path.join(yolo_path, "yolo-obj_2000.weights")
 config_path = os.path.join(yolo_path, "yolo-obj.cfg")
 classes_path = os.path.join(yolo_path, "classes.txt")
 # Config vars
-conf_thresh = 0.5  # Confidence threshold
+conf_thresh = 0.2  # Confidence threshold
 nms_thresh = 0.1  # Non-maximum suppression
 input_height = 416  # Height of network's input image
 input_width = 416  # Width of network's input image
 input_dim = (input_height, input_width)
 
 # === YOLO utility functions === #
+
+
+def get_colors(classes):
+    # initialize a list of colors to represent each possible class label
+    np.random.seed(42)
+    colors = np.random.randint(0, 255, size=(len(classes), 3), dtype="uint8")
+    return colors
 
 
 def get_labels(class_file: str):
@@ -62,7 +69,8 @@ def get_prediction(image, img_dim: tuple = (416, 416)):
     :return prediction (str) : Predicted object.
     """
     # Get class labels
-    classes = get_labels(classes_path)
+    with open(classes_path, "r") as clf:
+        classes = clf.read().splitlines()
 
     # Instantiate network
     net = load_model(config_path, weights_path)
@@ -79,9 +87,10 @@ def get_prediction(image, img_dim: tuple = (416, 416)):
     net.setInput(blob)
     start = time.time()
     layer_outputs = net.forward(ln)
+    # print(layer_outputs)
     end = time.time()
     msg = f"[INFO] YOLO took {end - start:.6f} seconds."  # Set up timing message
-    # print(msg)  # Print timing message
+    # print(msg)  # Print timing message to console
 
     # Initialize lists for bboxes, confidences, and class_ids
     boxes, confidences, class_ids, class_names = [], [], [], []
@@ -111,8 +120,21 @@ def get_prediction(image, img_dim: tuple = (416, 416)):
                 class_ids.append(class_id)
                 class_names.append(classes[class_id])
 
-    # Apply non-max suppression
+    # Apply non-max suppression (NMS)
     idxs = cv2.dnn.NMSBoxes(boxes, confidences, conf_thresh, nms_thresh)
 
-    return idxs
+    # List to hold class_ids that make it past NMS
+    nms_class_ids = []
+
+    # ensure at least one detection exists
+    if len(idxs) > 0:
+        # loop over the indexes we are keeping
+        for i in idxs.flatten():
+            text = f"{classes[class_ids[i]]}: {confidences[i]:.4f}"
+            print(text)
+            print(boxes)
+            nms_class_ids.append(classes[class_ids[i]])
+        return nms_class_ids[0], msg
+    else:
+        return None, "No object detected."
 

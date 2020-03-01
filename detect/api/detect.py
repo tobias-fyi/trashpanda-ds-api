@@ -13,6 +13,7 @@ import cv2
 from flask import Blueprint, request, redirect, url_for
 from flask_restplus import Resource, Api, fields
 from imageio import imread
+import numpy as np
 from sqlalchemy import exc
 
 from detect import db
@@ -21,6 +22,18 @@ from detect.api.yolo import get_prediction
 
 detect_blueprint = Blueprint("detect", __name__)
 api = Api(detect_blueprint)
+
+
+# === YOLO config variables === #
+# Paths to necessary files
+yolo_path = "detect/api/yolo_config"
+weights_path = os.path.join(yolo_path, "yolo-obj_1000.weights")
+config_path = os.path.join(yolo_path, "yolo-obj.cfg")
+classes_path = os.path.join(yolo_path, "classes.txt")
+test_img_path = os.path.join(yolo_path, "032.png")
+# Config vars
+conf_thresh = 0.5  # Confidence threshold
+nms_thresh = 0.1  # Non-maximum suppression
 
 
 # === Format for marshaled response objects === #
@@ -50,8 +63,8 @@ def from_base64(img_string: str):
     if img_string.startswith("data"):
         img_string = img_string.split(",")[-1]
     # Convert string to array and load into opencv
-    return imread(io.BytesIO(base64.b64decode(img_string)))
-    # return cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    img_array = imread(io.BytesIO(base64.b64decode(img_string)))
+    return cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
 
 
 def snake_to_cd_case(name: str):
@@ -91,26 +104,29 @@ class Detect(Resource):
             response_object["message"] = "success"
 
         # TODO: === Run object detection === #
-        prediction = get_prediction(img)
-
+        prediction, msg = get_prediction(img)
+        response_object["message"] = msg
         response_object["cluster"] = prediction
+
         # Format into Title Case for display purposes
-        # response_object["cluster_name"] = snake_to_cd_case(prediction)
+        if prediction:
+            response_object["cluster_name"] = snake_to_cd_case(prediction)
 
-        # Get list of materials for the predicted cluster
-        # materials = Material.query.filter(Material.cluster == prediction).all()
+            # Get list of materials for the predicted cluster
+            materials = Material.query.filter(Material.cluster == prediction).all()
 
-        return response_object, 200
+            if not materials:  # Query was unsuccessful
+                response_object["materials"] = []
+                response_object["message"] = f"No materials listed for {prediction}"
+                return response_object, 404
 
-        # if not materials:  # Query was unsuccessful
-        #     response_object["materials"] = []
-        #     response_object["message"] = f"No materials listed for {prediction}"
-        #     return response_object, 404
+            else:  # Query was successful
+                response_object["materials"] = [row.material_id for row in materials]
+                response_object["message"] = "success"
+                return response_object, 200
 
-        # else:  # Query was successful
-        #     response_object["materials"] = [row.material_id for row in materials]
-        #     response_object["message"] = "success"
-        #     return response_object, 200
+        else:  # No prediction was made
+            return response_object, 200
 
 
 class Clusters(Resource):
