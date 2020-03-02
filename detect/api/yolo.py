@@ -12,7 +12,7 @@ import cv2
 # === YOLO config variables === #
 # Paths to necessary files
 yolo_path = "detect/api/yolo_config"
-weights_path = os.path.join(yolo_path, "yolo-obj_2000.weights")
+weights_path = os.path.join(yolo_path, "yolo-obj_7000.weights")
 config_path = os.path.join(yolo_path, "yolo-obj.cfg")
 classes_path = os.path.join(yolo_path, "classes.txt")
 # Config vars
@@ -23,25 +23,6 @@ input_width = 416  # Width of network's input image
 input_dim = (input_height, input_width)
 
 # === YOLO utility functions === #
-
-
-def get_colors(classes):
-    # initialize a list of colors to represent each possible class label
-    np.random.seed(42)
-    colors = np.random.randint(0, 255, size=(len(classes), 3), dtype="uint8")
-    return colors
-
-
-def get_labels(class_file: str):
-    """
-    Load the tpds class labels that the model was trained on.
-    
-    :param class_file (str) : Path to class file (classes.txt).
-    :return classes (list)  : List of classes model was trained on.
-    """
-    with open(class_file, "r") as clf:
-        classes = clf.read().splitlines()
-    return classes
 
 
 def load_model(config_file: str, weights_file: str):
@@ -59,7 +40,7 @@ def load_model(config_file: str, weights_file: str):
     return net
 
 
-def get_prediction(image, img_dim: tuple = (416, 416)):
+def get_prediction(image, net, img_dim: tuple = (416, 416)):
     """
     Run object detection on image and return detections.
     
@@ -71,9 +52,6 @@ def get_prediction(image, img_dim: tuple = (416, 416)):
     # Get class labels
     with open(classes_path, "r") as clf:
         classes = clf.read().splitlines()
-
-    # Instantiate network
-    net = load_model(config_path, weights_path)
 
     (H, W) = image.shape[:2]
 
@@ -89,8 +67,9 @@ def get_prediction(image, img_dim: tuple = (416, 416)):
     layer_outputs = net.forward(ln)
     # print(layer_outputs)
     end = time.time()
-    msg = f"[INFO] YOLO took {end - start:.6f} seconds."  # Set up timing message
-    # print(msg)  # Print timing message to console
+    # pred_time = f"{end - start:.6f} seconds."  # Set up timing message
+    pred_time = end - start  # Set up timing message as number
+    print(pred_time)  # Print timing message to console
 
     # Initialize lists for bboxes, confidences, and class_ids
     boxes, confidences, class_ids, class_names = [], [], [], []
@@ -125,16 +104,29 @@ def get_prediction(image, img_dim: tuple = (416, 416)):
 
     # List to hold class_ids that make it past NMS
     nms_class_ids = []
+    pred_conf = dict()
 
     # ensure at least one detection exists
     if len(idxs) > 0:
         # loop over the indexes we are keeping
         for i in idxs.flatten():
             text = f"{classes[class_ids[i]]}: {confidences[i]:.4f}"
-            print(text)
-            print(boxes)
+            pred_conf[classes[class_ids[i]]] = confidences[i]
+            # print(text)
+            # print(boxes)
             nms_class_ids.append(classes[class_ids[i]])
-        return nms_class_ids[0], msg
+
+        top_object = max(pred_conf, key=pred_conf.get)
+        top_conf = pred_conf[top_object]
+
+        print("Top object:", top_object)
+        print(pred_conf[top_object])
+
+        return (
+            top_object,
+            top_conf,
+            pred_time,
+        )
     else:
         return None, "No object detected."
 

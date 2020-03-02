@@ -18,7 +18,7 @@ from sqlalchemy import exc
 
 from detect import db
 from detect.api.models import Material
-from detect.api.yolo import get_prediction
+from detect.api.yolo import get_prediction, load_model
 
 detect_blueprint = Blueprint("detect", __name__)
 api = Api(detect_blueprint)
@@ -27,14 +27,16 @@ api = Api(detect_blueprint)
 # === YOLO config variables === #
 # Paths to necessary files
 yolo_path = "detect/api/yolo_config"
-weights_path = os.path.join(yolo_path, "yolo-obj_1000.weights")
+weights_path = os.path.join(yolo_path, "yolo-obj_7000.weights")
 config_path = os.path.join(yolo_path, "yolo-obj.cfg")
 classes_path = os.path.join(yolo_path, "classes.txt")
 test_img_path = os.path.join(yolo_path, "032.png")
 # Config vars
-conf_thresh = 0.5  # Confidence threshold
+conf_thresh = 0.3  # Confidence threshold
 nms_thresh = 0.1  # Non-maximum suppression
 
+# === Instantiate network === #
+net = load_model(config_path, weights_path)
 
 # === Format for marshaled response objects === #
 # These dictionaries act as templates for response objects
@@ -51,6 +53,8 @@ material = api.model(  # Format/validate the data model as json
 # Format/validate custom json response
 resource_fields = {
     "message": fields.String(),
+    "pred_time": fields.Float(),
+    "confidence": fields.Float(),
     "cluster_name": fields.String(),
     "cluster": fields.String(),
     "materials": fields.List(fields.Integer()),
@@ -103,10 +107,11 @@ class Detect(Resource):
         else:
             response_object["message"] = "success"
 
-        # TODO: === Run object detection === #
-        prediction, msg = get_prediction(img)
-        response_object["message"] = msg
+        # === Run object detection === #
+        prediction, confidence, pred_time = get_prediction(img, net)
         response_object["cluster"] = prediction
+        response_object["confidence"] = round(confidence, 4)
+        response_object["pred_time"] = round(pred_time, 4)
 
         # Format into Title Case for display purposes
         if prediction:
