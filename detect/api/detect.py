@@ -9,32 +9,57 @@ import io
 import os
 import random
 
-from sqlalchemy import exc
-from flask import Blueprint, request, redirect, url_for
+import cv2
+from flask import Blueprint, request
 from flask_restplus import Resource, Api, fields
 from imageio import imread
+import numpy as np
+import pandas as pd
 
-from detect import db
-from detect.api.models import Material
+from detect.api.yolo import get_prediction, load_model
 
 detect_blueprint = Blueprint("detect", __name__)
 api = Api(detect_blueprint)
 
 
+# === Load Materials into pd.DataFrame === #
+csv_path = "detect/api/materials.csv"
+df_mat = pd.read_csv(csv_path)
+
+
+# === YOLO config variables === #
+# Paths to necessary files
+yolo_path = "detect/api/yolo_config"
+weights_path = os.path.join(yolo_path, "yolo-obj_13000.weights")
+config_path = os.path.join(yolo_path, "yolo-obj.cfg")
+classes_path = os.path.join(yolo_path, "classes.txt")
+# Config vars
+conf_thresh = 0.2  # Confidence threshold
+nms_thresh = 0.1  # Non-maximum suppression
+
+# === Instantiate network === #
+net = load_model(config_path, weights_path)
+
 # === Format for marshaled response objects === #
 # These dictionaries act as templates for response objects
 # and can validate the response if needed.
-material = api.model(  # Format/validate the data model as json
-    "Material",
-    {
-        "id": fields.Integer(readOnly=True),
-        "material_id": fields.Integer(readOnly=True),
-        "description": fields.String(),
-        "cluster": fields.String(),
-    },
-)
-# Format/validate custom json response
+# Format/validate the data model as json
+material = {
+    "material_id": fields.Integer(),
+    "material": fields.String(),
+    "cluster": fields.String(),
+}
+# Format / validate custom json response
 resource_fields = {
+    "message": fields.String(),
+    "pred_time": fields.Float(),
+    "confidence": fields.Float(),
+    "cluster_name": fields.String(),
+    "cluster": fields.String(),
+    "materials": fields.List(fields.Integer()),
+}
+# Format / validate cluster list json response
+cluster_fields = {
     "message": fields.String(),
     "cluster_name": fields.String(),
     "cluster": fields.String(),
@@ -47,8 +72,9 @@ def from_base64(img_string: str):
     # If base64 has metadata attached, get only data after comma
     if img_string.startswith("data"):
         img_string = img_string.split(",")[-1]
-    # Convert string to array
-    return imread(io.BytesIO(base64.b64decode(img_string)))
+    # Convert string to array and load into opencv
+    img_array = imread(io.BytesIO(base64.b64decode(img_string)))
+    return cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
 
 
 def snake_to_cd_case(name: str):
@@ -87,34 +113,31 @@ class Detect(Resource):
         else:
             response_object["message"] = "success"
 
-        # TODO: Make prediction
-        # Before implementing a model, randomize dummy prediction
-        # Retrieve all records from database
-        all_materials = Material.query.all()
-        # Set comprehension for clusters
-        all_clusters = {row.cluster for row in all_materials}
-        # Choose random cluster from set
-        prediction = random.choice(list(all_clusters))
+        # === Run object detection === #
+        prediction, confidence, pred_time = get_prediction(img, net)
         response_object["cluster"] = prediction
+        response_object["confidence"] = confidence
+        response_object["pred_time"] = pred_time
+
         # Format into Title Case for display purposes
-        response_object["cluster_name"] = snake_to_cd_case(prediction)
+        if prediction:
+            response_object["cluster_name"] = snake_to_cd_case(prediction)
 
-        # Get list of materials for the predicted cluster
-        materials = Material.query.filter(Material.cluster == prediction).all()
+            # Get list of materials for the predicted cluster
+            materials = df_mat[df_mat["cluster"] == prediction]
 
-        if not materials:  # Query was unsuccessful
-            response_object["materials"] = []
-            response_object["message"] = f"No materials listed for {prediction}"
-            return response_object, 404
-
-        else:  # Query was successful
-            response_object["materials"] = [row.material_id for row in materials]
+            # response_object["materials"] = [row.material_id for row in materials]
+            response_object["materials"] = materials["material_id"].tolist()
             response_object["message"] = "success"
             return response_object, 200
 
+        else:  # No prediction was made
+            response_object["message"] = "No object detected."
+            return response_object, 404
+
 
 class Clusters(Resource):
-    @api.marshal_with(resource_fields)
+    @api.marshal_with(cluster_fields)
     def get(self, cluster):
         # Instantiate response object
         response_object = {}
@@ -124,22 +147,27 @@ class Clusters(Resource):
         response_object["cluster_name"] = snake_to_cd_case(cluster)
 
         # Get list of records matching the cluster name
-        materials = Material.query.filter(Material.cluster == cluster).all()
-        if not materials:  # Query was unsuccessful
-            response_object["materials"] = []
-            response_object["message"] = f"No materials listed for {cluster}"
-            return response_object, 404
+        # materials = Material.query.filter(Material.cluster == cluster).all()
+        materials = df_mat[df_mat["cluster"] == cluster]
 
-        else:
-            response_object["materials"] = [row.material_id for row in materials]
-            response_object["message"] = "success"
-            return response_object, 200
+        # response_object["materials"] = [row.material_id for row in materials]
+        response_object["materials"] = materials["material_id"].tolist()
+        response_object["message"] = "success"
+        return response_object, 200
 
 
 class ClustersList(Resource):
     @api.marshal_with(material, as_list=True)
     def get(self):
-        return Material.query.all(), 200
+        response_object = []
+        for index, row in df_mat.iterrows():
+            resp_dict = {
+                "material_id": row["material_id"],
+                "material": row["material"],
+                "cluster": row["cluster"],
+            }
+            response_object.append(resp_dict)
+        return response_object, 200
 
 
 api.add_resource(Ping, "/ping")

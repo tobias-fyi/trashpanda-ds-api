@@ -1,3 +1,4 @@
+material_id,material,cluster
 3,Antifreeze,hazardous_fluid
 219,Auto Bodies,vehicles
 275,Auto Parts,auto_parts
@@ -147,15 +148,15 @@
 234,Weeds,green_waste
 352,Wood Chips,green_waste
 78,Yard Waste,green_waste
-255,Blue Glass Beverage Containers,glass_container
-430,Blue Glass Containers,glass_container
-76,Brown Glass Beverage Containers,glass_container
-431,Brown Glass Containers,glass_container
-77,Clear Glass Beverage Containers,glass_container
-432,Clear Glass Containers,glass_container
-102,Green Glass Beverage Containers,glass_container
-433,Green Glass Containers,glass_container
-256,Treated Glass Containers,glass_container
+255,Blue Glass Beverage Containers,glass
+430,Blue Glass Containers,glass
+76,Brown Glass Beverage Containers,glass
+431,Brown Glass Containers,glass
+77,Clear Glass Beverage Containers,glass
+432,Clear Glass Containers,glass
+102,Green Glass Beverage Containers,glass
+433,Green Glass Containers,glass
+256,Treated Glass Containers,glass
 503,Acids,hazardous_fluid
 187,Adhesives,hazardous_fluid
 521,Aerosol Cans - Full,aerosol_cans
@@ -164,7 +165,7 @@
 194,Ammunition,ammunition
 196,Asbestos,none
 333,CFLs,lightbulb
-364,Chemistry Sets,glass_container
+364,Chemistry Sets,glass
 527,Controlled Substances,medications
 130,Cooking Oil,cooking_oil
 702,Exit Signs,home_electronics
