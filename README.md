@@ -4,10 +4,10 @@ A Flask REST API to receive image data, run it through an object detection model
 
 - [Overview](#overview)
 - [Usage](#usage)
-  - [Object Detection](#object-detection)
-  - [Database Queries](#database-queries)
-    - [List of all materials](#list-of-all-materials)
-    - [Materials list for each cluster](#materials-list-for-each-cluster)
+    - [Object Detection](#object-detection)
+    - [Database Queries](#database-queries)
+        - [List of all materials](#list-of-all-materials)
+        - [Materials list for each cluster](#materials-list-for-each-cluster)
 
 ## Overview
 
@@ -34,6 +34,24 @@ The POST request should be `JSON`, formatted as follows:
 ```
 
 > Note: in this example, the base64-encoded image string has been truncated. A valid base64 string will likely be hundreds of thousands of characters in length.
+
+If successful, the response object will look something like this:
+
+```json
+{
+    "message": "success",
+    "pred_time": 1.862464189529419,
+    "confidence": 0.712219774723053,
+    "cluster_name": "Plastic Bags",
+    "cluster": "plastic_bags",
+    "materials": [
+        445,
+        93,
+        478,
+        699
+    ]
+}
+```
 
 ### Database Queries
 
