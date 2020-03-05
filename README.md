@@ -159,6 +159,17 @@ Tests have been set up to test the endpoints. To run these tests, run the follow
 $ pytest detect/tests
 ```
 
+Ideally, the output will be nice and green!
+
+    ============================================== test session starts ===============================================
+    ...
+    collected 9 items
+
+    detect/tests/test_config.py ...                                                                            [ 33%]
+    detect/tests/test_detect.py ......                                                                         [100%]
+
+    =============================================== 9 passed in 2.64s ================================================
+
 ---
 
 ## Setup
