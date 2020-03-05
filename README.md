@@ -14,6 +14,7 @@ A Flask REST API to receive image data, run it through an object detection model
   - [Database queries](#database-queries)
     - [List of clusters and materials](#list-of-clusters-and-materials)
     - [Materials list for a specific cluster](#materials-list-for-a-specific-cluster)
+  - [Tests](#tests)
 - [Setup](#setup)
   - [Running locally (without Docker)](#running-locally-without-docker)
     - [Setting Up the environment](#setting-up-the-environment)
@@ -149,6 +150,25 @@ Regardless of the setup, the following routes are configured to query for the ma
     http://localhost:5000/clusters/<cluster>
 
 Where `<cluster>` is the name of the cluster for which the materials should be listed.
+
+### Tests
+
+Tests have been set up to test the endpoints. To run these tests, run the following from the repository root:
+
+```shell
+$ pytest detect/tests
+```
+
+Ideally, the output will be nice and green!
+
+    ==================================== test session starts ====================================
+    ...
+    collected 9 items
+
+    detect/tests/test_config.py ...                                                       [ 33%]
+    detect/tests/test_detect.py ......                                                    [100%]
+
+    ===================================== 9 passed in 2.42s =====================================
 
 ---
 
