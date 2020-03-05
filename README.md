@@ -308,13 +308,32 @@ When deploying to AWS Elastic Beanstalk, it is highly recommended to install and
 
 Here is the EB documentation that was used to initially [deploy to EB using a single Docker container](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/single-container-docker.html).
 
-Once the CLI is installed, simply run the following commands from the repository root:
+Note: in order to deploy using the method described here, the `.weights` file must be committed to version control (and downloaded, if not done already). One method is to create a new git branch for deployment: `$ git checkout -b deploy`.
+
+Once that branch is created and active (both done via the command above), uncomment out the relevant line in `.gitignore`:
+
+```.gitignore
+# *.weights
+```
+
+Then commit the `.gitignore` and `*.weights` files:
+
+```shell
+$ git add .gitignore
+$ git add detect/api/yolo_config/yolo-obj_14000.weights
+$ git commit -m "Added weights to vc to deploy to elastic beanstalk"
+```
+
+As the `.weights` files are too large to get pushed to GitHub, be sure to only use that branch for deploying to EB. Removing large files from git history is not a very fun process, so don't forget!
+
+Once the CLI is installed and the new deployment branch created (but not pushed to GitHub), with the weights files committed to that branch, run the following commands from the repository root:
 
 ```shell
 # Initialize the EB application
 $ eb init -p docker detect-api
 
 # Create environment and deploy
+# This will take a while as it needs to upload the entire ~250mb
 $ eb create detect-api
 
 # If successful, open the app in default browser (or go into AWS console)
