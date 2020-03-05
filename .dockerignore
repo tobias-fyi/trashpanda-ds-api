@@ -6,4 +6,7 @@ assets_/
 Pipfile
 Pipfile.lock
 LICENSE
-README.md
+README.md# Elastic Beanstalk Files
+.elasticbeanstalk/*
+.git
+.gitignore
