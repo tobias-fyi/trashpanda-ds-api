@@ -12,7 +12,7 @@ import cv2
 # === YOLO config variables === #
 # Paths to necessary files
 yolo_path = "detect/api/yolo_config"
-weights_path = os.path.join(yolo_path, "yolo-obj_13000.weights")
+weights_path = os.path.join(yolo_path, "yolo-obj_14000.weights")
 config_path = os.path.join(yolo_path, "yolo-obj.cfg")
 classes_path = os.path.join(yolo_path, "classes.txt")
 # Config vars
@@ -128,5 +128,5 @@ def get_prediction(image, net, img_dim: tuple = (416, 416)):
             pred_time,
         )
     else:
-        return None, None, None
+        return None, None, pred_time
 
