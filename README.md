@@ -33,6 +33,8 @@ A Flask REST API to receive image data, run it through an object detection model
   - [Attribution](#attribution)
 - [Documentation](#documentation)
 
+---
+
 ## Contributors
 
 |                                              [Timothy Hsu](https://github.com/TimTree)                                               |                                          [Tobias Reaper](https://github.com/tobiasfyi)                                          |                                              [Trevor Clack](https://github.com/tclack88)                                              |                                             [Vera Mendes](https://github.com/VeraMendes)                                             |
@@ -43,6 +45,8 @@ A Flask REST API to receive image data, run it through an object detection model
 
 ![MIT](https://img.shields.io/packagist/l/doctrine/orm.svg)
 
+---
+
 ## Overview
 
 ### Trash Panda
@@ -51,7 +55,7 @@ A Flask REST API to receive image data, run it through an object detection model
 
 [Product Canvas](https://www.notion.so/d2e8748fdffe4c66a0a6641582dd6b63?v=4c919ea10f204aa89cd9184d59a9e6f4)
 
-Trash Panda is an app that uses image recognition AI to help you recycling better. You may search through a list of categories, enter in a material to our search bar, or use your camera to scan the item and discover how to properly dispose of your material! A lot of things end up in garbage bags sent off to the landfill when they might have a better way of being disposed. With Trash Panda, you will become wiser at disposing items and be better to our planet!
+Trash Panda is an app that, with the help of an image recognition AI, makes it easier to start and maintain better recycling habits. You may search through a list of categories, enter in a material to our search bar, or use your camera to scan the item and discover how to properly dispose of your material! A lot of things end up in garbage bags sent off to the landfill when they might have a better way of being disposed. With Trash Panda, you will become wiser at disposing items and be better to our planet!
 
 You’ll receive proper disposal information specific to your location if you live in the USA. Currently, Trashpanda provides international users with an AI result and general information about how materials can be disposed of properly, but it will not provide disposal locations for international postal codes.
 
@@ -76,6 +80,8 @@ The core of the API is built on Flask and Flask-RESTPlus, and (optionally) conta
 The production app is currently deployed to [AWS Elastic Beanstalk](http://trashpanda-detect.eba-acqmen85.us-east-2.elasticbeanstalk.com/).
 
 A relatively simple image read/write package `imageio` is used to convert base64-encoded images into numpy arrays, which are fed directly into the object detection model. The model used for inference is built from the trained darknet weights files by way of the OpenCV [DNN](https://docs.opencv.org/trunk/d6/d0f/group__dnn.html) (Deep Neural Networks) module, which reads the weights file and provides an API for making predictions.
+
+---
 
 ## Usage
 
@@ -143,6 +149,8 @@ Regardless of the setup, the following routes are configured to query for the ma
     http://localhost:5000/clusters/<cluster>
 
 Where `<cluster>` is the name of the cluster for which the materials should be listed.
+
+---
 
 ## Setup
 
@@ -281,6 +289,8 @@ To stop a container, grad the ID and pass that into the stop command:
 $ docker stop f7d7d8703c78
 ```
 
+---
+
 ## Deploy
 
 One important benefit of Docker is ease of deployment. There are 3 different Dockerfiles in this repository, each one having a specific purpose:
@@ -368,6 +378,8 @@ You should then be able to visit the app and test out the deployed API!
 
 In this example, the app would be live at `https://gentle-mesa-73091.herokuapp.com/`.
 
+---
+
 ## Contributing
 
 When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.
@@ -404,6 +416,8 @@ Remember that this project is licensed under the MIT license, and by submitting 
 ### Attribution
 
 These contribution guidelines have been adapted from [this good-Contributing.md-template](https://gist.github.com/PurpleBooth/b24679402957c63ec426).
+
+---
 
 ## Documentation
 
