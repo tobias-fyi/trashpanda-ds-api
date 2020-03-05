@@ -161,14 +161,14 @@ $ pytest detect/tests
 
 Ideally, the output will be nice and green!
 
-    ============================================== test session starts ===============================================
+    ==================================== test session starts ====================================
     ...
     collected 9 items
 
-    detect/tests/test_config.py ...                                                                            [ 33%]
-    detect/tests/test_detect.py ......                                                                         [100%]
+    detect/tests/test_config.py ...                                                       [ 33%]
+    detect/tests/test_detect.py ......                                                    [100%]
 
-    =============================================== 9 passed in 2.64s ================================================
+    ===================================== 9 passed in 2.42s =====================================
 
 ---
 
