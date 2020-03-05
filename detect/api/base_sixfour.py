@@ -52,7 +52,7 @@ def dir_base64(dirpath: str):
 
 
 # === Convert all images in directory to base64 === #
-img_dirpath = "../test_images/plastic_bottles"
+img_dirpath = "detect/api/tests/images/"
 dir_base64(img_dirpath)
 
 
